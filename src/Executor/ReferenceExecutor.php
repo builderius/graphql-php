@@ -763,7 +763,7 @@ class ReferenceExecutor implements ExecutorImplementation
         }
         // Account for invalid schema definition when typeLoader returns different
         // instance than `resolveType` or $field->getType() or $arg->getType()
-        if ($returnType !== $this->exeContext->schema->getType($returnType->name)) {
+        /*if ($returnType !== $this->exeContext->schema->getType($returnType->name)) {
             $hint = '';
             if ($this->exeContext->schema->getConfig()->typeLoader !== null) {
                 $hint = sprintf(
@@ -780,7 +780,7 @@ class ReferenceExecutor implements ExecutorImplementation
                     $hint
                 )
             );
-        }
+        }*/
         // If field type is Scalar or Enum, serialize to a valid value, returning
         // null if serialization is not possible.
         if ($returnType instanceof LeafType) {
@@ -1288,7 +1288,7 @@ class ReferenceExecutor implements ExecutorImplementation
                 sprintf('Runtime Object type "%s" is not a possible type for "%s".', $runtimeType, $returnType)
             );
         }
-        if ($runtimeType !== $this->exeContext->schema->getType($runtimeType->name)) {
+        /*if ($runtimeType !== $this->exeContext->schema->getType($runtimeType->name)) {
             throw new InvariantViolation(
                 sprintf(
                     'Schema must contain unique named types but contains multiple types named "%s". ' .
@@ -1299,7 +1299,7 @@ class ReferenceExecutor implements ExecutorImplementation
                     $returnType
                 )
             );
-        }
+        }*/
 
         return $runtimeType;
     }
