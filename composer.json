@@ -1,9 +1,9 @@
 {
-  "name":              "builderius/graphql-php",
+  "name":              "webonyx/graphql-php",
   "description":       "A PHP port of GraphQL reference implementation",
   "type":              "library",
   "license":           "MIT",
-  "homepage":          "https://github.com/builderius/graphql-php",
+  "homepage":          "https://github.com/webonyx/graphql-php",
   "keywords":          [
     "graphql",
     "API"
