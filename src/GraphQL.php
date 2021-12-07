@@ -86,7 +86,8 @@ class GraphQL
         $variableValues = null,
         ?string $operationName = null,
         ?callable $fieldResolver = null,
-        ?array $validationRules = null
+        ?array $validationRules = null,
+        \SplObjectStorage $subFieldCache = null
     ) : ExecutionResult {
         $promiseAdapter = new SyncPromiseAdapter();
 
@@ -99,7 +100,8 @@ class GraphQL
             $variableValues,
             $operationName,
             $fieldResolver,
-            $validationRules
+            $validationRules,
+            $subFieldCache
         );
 
         return $promiseAdapter->wait($promise);
@@ -126,7 +128,8 @@ class GraphQL
         $variableValues = null,
         ?string $operationName = null,
         ?callable $fieldResolver = null,
-        ?array $validationRules = null
+        ?array $validationRules = null,
+        \SplObjectStorage $subFieldCache = null
     ) : Promise {
         try {
             if ($source instanceof DocumentNode) {
@@ -166,7 +169,8 @@ class GraphQL
                 $context,
                 $variableValues,
                 $operationName,
-                $fieldResolver
+                $fieldResolver,
+                $subFieldCache
             );
         } catch (Error $e) {
             return $promiseAdapter->createFulfilled(

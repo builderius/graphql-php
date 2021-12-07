@@ -137,7 +137,8 @@ class Executor
         $contextValue = null,
         $variableValues = null,
         $operationName = null,
-        ?callable $fieldResolver = null
+        ?callable $fieldResolver = null,
+        \SplObjectStorage $subFieldCache = null
     ) {
         $factory = self::$implementationFactory;
 
@@ -150,7 +151,8 @@ class Executor
             $contextValue,
             $variableValues,
             $operationName,
-            $fieldResolver ?? self::$defaultFieldResolver
+            $fieldResolver ?? self::$defaultFieldResolver,
+            $subFieldCache
         );
 
         return $executor->doExecute();

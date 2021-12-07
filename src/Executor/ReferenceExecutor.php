@@ -63,13 +63,13 @@ class ReferenceExecutor implements ExecutorImplementation
     /** @var SplObjectStorage */
     private $subFieldCache;
 
-    private function __construct(ExecutionContext $context)
+    private function __construct(ExecutionContext $context, SplObjectStorage $subFieldCache = null)
     {
         if (! self::$UNDEFINED) {
             self::$UNDEFINED = Utils::undefined();
         }
         $this->exeContext    = $context;
-        $this->subFieldCache = new SplObjectStorage();
+        $this->subFieldCache = $subFieldCache ? : new SplObjectStorage();
     }
 
     /**
@@ -85,7 +85,8 @@ class ReferenceExecutor implements ExecutorImplementation
         $contextValue,
         $variableValues,
         ?string $operationName,
-        callable $fieldResolver
+        callable $fieldResolver,
+        SplObjectStorage $subFieldCache = null
     ) : ExecutorImplementation {
         $exeContext = self::buildExecutionContext(
             $schema,
@@ -116,7 +117,7 @@ class ReferenceExecutor implements ExecutorImplementation
             };
         }
 
-        return new self($exeContext);
+        return new self($exeContext, $subFieldCache);
     }
 
     /**
