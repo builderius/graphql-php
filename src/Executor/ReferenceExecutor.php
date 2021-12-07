@@ -39,6 +39,7 @@ use GraphQL\Utils\TypeInfo;
 use GraphQL\Utils\Utils;
 use RuntimeException;
 use SplObjectStorage;
+use Symfony\Component\PropertyAccess\PropertyAccess;
 use stdClass;
 use Throwable;
 use Traversable;
@@ -566,6 +567,13 @@ class ReferenceExecutor implements ExecutorImplementation
             $path,
             $result
         );
+        if ($this->cache) {
+            $res = $this->cache->get('results');
+            $res = $res !== false ? $res : [];
+            $propertyAccessor = PropertyAccess::createPropertyAccessor();
+            $propertyAccessor->setValue($res, sprintf('[%s]', implode('][', $path)), $result);
+            $this->cache->set('results', $res);
+        }
 
         return $result;
     }
