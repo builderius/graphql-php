@@ -6,6 +6,7 @@ namespace GraphQL\Executor;
 
 use ArrayAccess;
 use Closure;
+use GraphQL\Cache\GraphQLObjectCache;
 use GraphQL\Executor\Promise\Adapter\SyncPromiseAdapter;
 use GraphQL\Executor\Promise\Promise;
 use GraphQL\Executor\Promise\PromiseAdapter;
@@ -138,7 +139,7 @@ class Executor
         $variableValues = null,
         $operationName = null,
         ?callable $fieldResolver = null,
-        \SplObjectStorage $subFieldCache = null
+        GraphQLObjectCache $cache = null
     ) {
         $factory = self::$implementationFactory;
 
@@ -152,7 +153,7 @@ class Executor
             $variableValues,
             $operationName,
             $fieldResolver ?? self::$defaultFieldResolver,
-            $subFieldCache
+            $cache
         );
 
         return $executor->doExecute();

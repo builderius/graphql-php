@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace GraphQL;
 
+use GraphQL\Cache\GraphQLObjectCache;
 use GraphQL\Error\Error;
 use GraphQL\Executor\ExecutionResult;
 use GraphQL\Executor\Executor;
@@ -87,7 +88,7 @@ class GraphQL
         ?string $operationName = null,
         ?callable $fieldResolver = null,
         ?array $validationRules = null,
-        \SplObjectStorage $subFieldCache = null
+        GraphQLObjectCache $cache = null
     ) : ExecutionResult {
         $promiseAdapter = new SyncPromiseAdapter();
 
@@ -101,7 +102,7 @@ class GraphQL
             $operationName,
             $fieldResolver,
             $validationRules,
-            $subFieldCache
+            $cache
         );
 
         return $promiseAdapter->wait($promise);
@@ -129,7 +130,7 @@ class GraphQL
         ?string $operationName = null,
         ?callable $fieldResolver = null,
         ?array $validationRules = null,
-        \SplObjectStorage $subFieldCache = null
+        GraphQLObjectCache $cache = null
     ) : Promise {
         try {
             if ($source instanceof DocumentNode) {
@@ -170,7 +171,7 @@ class GraphQL
                 $variableValues,
                 $operationName,
                 $fieldResolver,
-                $subFieldCache
+                $cache
             );
         } catch (Error $e) {
             return $promiseAdapter->createFulfilled(

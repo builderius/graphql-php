@@ -7,6 +7,7 @@ namespace GraphQL\Executor;
 use ArrayAccess;
 use ArrayObject;
 use Exception;
+use GraphQL\Cache\GraphQLObjectCache;
 use GraphQL\Error\Error;
 use GraphQL\Error\InvariantViolation;
 use GraphQL\Error\Warning;
@@ -63,13 +64,17 @@ class ReferenceExecutor implements ExecutorImplementation
     /** @var SplObjectStorage */
     private $subFieldCache;
 
-    private function __construct(ExecutionContext $context, SplObjectStorage $subFieldCache = null)
+    /** @var GraphQLObjectCache */
+    private $cache;
+
+    private function __construct(ExecutionContext $context, GraphQLObjectCache $cache = null)
     {
         if (! self::$UNDEFINED) {
             self::$UNDEFINED = Utils::undefined();
         }
         $this->exeContext    = $context;
-        $this->subFieldCache = $subFieldCache ? : new SplObjectStorage();
+        $this->subFieldCache = new SplObjectStorage();
+        $this->cache = $cache;
     }
 
     /**
@@ -86,7 +91,7 @@ class ReferenceExecutor implements ExecutorImplementation
         $variableValues,
         ?string $operationName,
         callable $fieldResolver,
-        SplObjectStorage $subFieldCache = null
+        GraphQLObjectCache $cache = null
     ) : ExecutorImplementation {
         $exeContext = self::buildExecutionContext(
             $schema,
@@ -117,7 +122,7 @@ class ReferenceExecutor implements ExecutorImplementation
             };
         }
 
-        return new self($exeContext, $subFieldCache);
+        return new self($exeContext, $cache);
     }
 
     /**
