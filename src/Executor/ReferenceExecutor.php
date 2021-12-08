@@ -568,8 +568,9 @@ class ReferenceExecutor implements ExecutorImplementation
             $result
         );
         if ($this->cache) {
+            $result = (is_array($result) && !empty($result) && (!isset($result[0]))) ? (object)$result : $result;
             $res = $this->cache->get('results');
-            $res = $res !== false ? $res : [];
+            $res = $res !== false ? $res : new ArrayObject([]);
             $propertyAccessor = PropertyAccess::createPropertyAccessor();
             $propertyAccessor->setValue($res, sprintf('[%s]', implode('][', $path)), $result);
             $this->cache->set('results', $res);
