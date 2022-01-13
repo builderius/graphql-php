@@ -568,11 +568,24 @@ class ReferenceExecutor implements ExecutorImplementation
             $result
         );
         if ($this->cache) {
-            $result = (is_array($result) && !empty($result) && (!isset($result[0]))) ? (object)$result : $result;
             $res = $this->cache->get('results');
-            $res = $res !== false ? $res : new ArrayObject([]);
+            $res = $res !== \false ? $res : [];
             $propertyAccessor = PropertyAccess::createPropertyAccessor();
-            $propertyAccessor->setValue($res, sprintf('[%s]', implode('][', $path)), $result);
+            $tmpPath = $path;
+            unset($tmpPath[count($tmpPath)-1]);
+            $tmpPath2 = [];
+            foreach ($tmpPath as $v) {
+                $tmpPath2[] = $v;
+                try {
+                    $exists = $propertyAccessor->getValue($res, \sprintf('[%s]', \implode('][', $tmpPath2)));
+                    if (!$exists) {
+                        $propertyAccessor->setValue($res, \sprintf('[%s]', \implode('][', $tmpPath2)), []);
+                    }
+                }catch (\Exception $e) {
+                    $propertyAccessor->setValue($res, \sprintf('[%s]', \implode('][', $tmpPath2)), []);
+                }
+            }
+            $propertyAccessor->setValue($res, \sprintf('[%s]', \implode('][', $path)), $result);
             $this->cache->set('results', $res);
         }
 
