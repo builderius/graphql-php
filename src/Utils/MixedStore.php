@@ -90,6 +90,7 @@ class MixedStore implements ArrayAccess
      * <p>
      * The return value will be casted to boolean if non-boolean was returned.
      */
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset)
     {
         if ($offset === false) {
@@ -135,6 +136,7 @@ class MixedStore implements ArrayAccess
      *
      * @return mixed Can return all value types.
      */
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         if ($offset === true) {
@@ -184,6 +186,7 @@ class MixedStore implements ArrayAccess
      *
      * @return void
      */
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         if ($offset === false) {
@@ -220,6 +223,7 @@ class MixedStore implements ArrayAccess
      *
      * @return void
      */
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         if ($offset === true) {

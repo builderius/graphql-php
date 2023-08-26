@@ -69,6 +69,7 @@ class NodeList implements ArrayAccess, IteratorAggregate, Countable
      *
      * @phpstan-return T
      */
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)// : Node
     {
         $item = $this->nodes[$offset];

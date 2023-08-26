@@ -39,6 +39,7 @@ use GraphQL\Utils\TypeInfo;
 use GraphQL\Utils\Utils;
 use RuntimeException;
 use SplObjectStorage;
+use MooMoo\Platform\Bundle\KernelBundle\EventDispatcher\EventDispatcher;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use stdClass;
 use Throwable;
@@ -68,7 +69,10 @@ class ReferenceExecutor implements ExecutorImplementation
     /** @var GraphQLObjectCache */
     private $cache;
 
-    private function __construct(ExecutionContext $context, GraphQLObjectCache $cache = null)
+    /** @var EventDispatcher */
+    private $eventDispatcher;
+
+    private function __construct(ExecutionContext $context, GraphQLObjectCache $cache = null, EventDispatcher $eventDispatcher = null)
     {
         if (! self::$UNDEFINED) {
             self::$UNDEFINED = Utils::undefined();
@@ -76,6 +80,7 @@ class ReferenceExecutor implements ExecutorImplementation
         $this->exeContext    = $context;
         $this->subFieldCache = new SplObjectStorage();
         $this->cache = $cache;
+        $this->eventDispatcher = $eventDispatcher;
     }
 
     /**
@@ -92,7 +97,8 @@ class ReferenceExecutor implements ExecutorImplementation
         $variableValues,
         ?string $operationName,
         callable $fieldResolver,
-        GraphQLObjectCache $cache = null
+        GraphQLObjectCache $cache = null,
+        EventDispatcher $eventDispatcher = null
     ) : ExecutorImplementation {
         $exeContext = self::buildExecutionContext(
             $schema,
@@ -123,7 +129,7 @@ class ReferenceExecutor implements ExecutorImplementation
             };
         }
 
-        return new self($exeContext, $cache);
+        return new self($exeContext, $cache, $eventDispatcher);
     }
 
     /**
@@ -1232,7 +1238,13 @@ class ReferenceExecutor implements ExecutorImplementation
         }
         // If there are no promises, we can just return the object
         if (! $containsPromise) {
-            return self::fixResultsIfEmptyArray($results);
+            $results = self::fixResultsIfEmptyArray($results);
+            $event = new \Builderius\Bundle\GraphQLBundle\Event\GraphQLSubfieldsResolvedEvent($results, $fields);
+            if ($this->eventDispatcher) {
+                $this->eventDispatcher->dispatch($event, 'builderius_graphql_subfields_resolved');
+            }
+
+            return $event->getResults();
         }
 
         // Otherwise, results is a map from field name to the result of resolving that

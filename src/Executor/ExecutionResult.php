@@ -115,6 +115,7 @@ class ExecutionResult implements JsonSerializable
     /**
      * @return mixed[]
      */
+    #[\ReturnTypeWillChange]
     public function jsonSerialize()
     {
         return $this->toArray();

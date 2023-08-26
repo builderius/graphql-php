@@ -23,6 +23,7 @@ use GraphQL\Type\Schema as SchemaType;
 use GraphQL\Validator\DocumentValidator;
 use GraphQL\Validator\Rules\QueryComplexity;
 use GraphQL\Validator\Rules\ValidationRule;
+use MooMoo\Platform\Bundle\KernelBundle\EventDispatcher\EventDispatcher;
 use function array_values;
 use function count;
 use function trigger_error;
@@ -88,7 +89,8 @@ class GraphQL
         ?string $operationName = null,
         ?callable $fieldResolver = null,
         ?array $validationRules = null,
-        GraphQLObjectCache $cache = null
+        GraphQLObjectCache $cache = null,
+        EventDispatcher $eventDispatcher = null
     ) : ExecutionResult {
         $promiseAdapter = new SyncPromiseAdapter();
 
@@ -102,7 +104,8 @@ class GraphQL
             $operationName,
             $fieldResolver,
             $validationRules,
-            $cache
+            $cache,
+            $eventDispatcher
         );
 
         return $promiseAdapter->wait($promise);
@@ -130,7 +133,8 @@ class GraphQL
         ?string $operationName = null,
         ?callable $fieldResolver = null,
         ?array $validationRules = null,
-        GraphQLObjectCache $cache = null
+        GraphQLObjectCache $cache = null,
+        EventDispatcher $eventDispatcher = null
     ) : Promise {
         try {
             if ($source instanceof DocumentNode) {
@@ -171,7 +175,8 @@ class GraphQL
                 $variableValues,
                 $operationName,
                 $fieldResolver,
-                $cache
+                $cache,
+                $eventDispatcher
             );
         } catch (Error $e) {
             return $promiseAdapter->createFulfilled(
