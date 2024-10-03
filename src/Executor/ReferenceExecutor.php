@@ -39,7 +39,7 @@ use GraphQL\Utils\TypeInfo;
 use GraphQL\Utils\Utils;
 use RuntimeException;
 use SplObjectStorage;
-use MooMoo\Platform\Bundle\KernelBundle\EventDispatcher\EventDispatcher;
+use Swoop\Bundle\KernelBundle\EventDispatcher\EventDispatcher;
 use Symfony\Component\PropertyAccess\PropertyAccess;
 use stdClass;
 use Throwable;

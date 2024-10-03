@@ -23,7 +23,7 @@ use GraphQL\Type\Schema as SchemaType;
 use GraphQL\Validator\DocumentValidator;
 use GraphQL\Validator\Rules\QueryComplexity;
 use GraphQL\Validator\Rules\ValidationRule;
-use MooMoo\Platform\Bundle\KernelBundle\EventDispatcher\EventDispatcher;
+use Swoop\Bundle\KernelBundle\EventDispatcher\EventDispatcher;
 use function array_values;
 use function count;
 use function trigger_error;

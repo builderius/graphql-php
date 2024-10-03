@@ -13,7 +13,7 @@ use GraphQL\Executor\Promise\PromiseAdapter;
 use GraphQL\Language\AST\DocumentNode;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Schema;
-use MooMoo\Platform\Bundle\KernelBundle\EventDispatcher\EventDispatcher;
+use Swoop\Bundle\KernelBundle\EventDispatcher\EventDispatcher;
 use function is_array;
 use function is_object;
 
