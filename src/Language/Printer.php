@@ -474,10 +474,16 @@ class Printer
     /**
      * If maybeString is not null or empty, then wrap with start and end, otherwise
      * print an empty string.
+     *
+     * As in join(), "not empty" is tested as such rather than as truthiness: a
+     * default value of 0 (`query ($limit: Int = 0)`) prints as "0", which PHP
+     * reads as false, and the default was dropped from the printed document.
      */
     public function wrap($start, $maybeString, $end = '')
     {
-        return $maybeString ? ($start . $maybeString . $end) : '';
+        return $maybeString !== null && $maybeString !== ''
+            ? ($start . $maybeString . $end)
+            : '';
     }
 
     /**
@@ -493,7 +499,9 @@ class Printer
 
     public function indent($maybeString)
     {
-        return $maybeString ? '  ' . str_replace("\n", "\n  ", $maybeString) : '';
+        return $maybeString !== null && $maybeString !== ''
+            ? '  ' . str_replace("\n", "\n  ", $maybeString)
+            : '';
     }
 
     public function manyList($start, $list, $separator, $end)
@@ -506,6 +514,16 @@ class Printer
         return $maybeArray ? count($maybeArray) : 0;
     }
 
+    /**
+     * Joins the already-printed parts of a node, dropping the ones that printed
+     * to nothing.
+     *
+     * The predicate tests for an empty string rather than for falsiness. A part
+     * that printed as "0" is a real part of the document - the integer 0 inside
+     * a list value is the case that reaches this - and PHP reads "0" as false,
+     * so a truthiness test deleted it silently: `f(arguments: [1, 0, 2])`
+     * printed as `f(arguments: [1, 2])`. Upstream made the same change in 15.x.
+     */
     public function join($maybeArray, $separator = '') : string
     {
         return $maybeArray
@@ -514,7 +532,7 @@ class Printer
                 Utils::filter(
                     $maybeArray,
                     static function ($x) : bool {
-                        return (bool) $x;
+                        return $x !== null && $x !== '';
                     }
                 )
             )

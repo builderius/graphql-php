@@ -72,7 +72,7 @@ class ReferenceExecutor implements ExecutorImplementation
     /** @var EventDispatcher */
     private $eventDispatcher;
 
-    private function __construct(ExecutionContext $context, GraphQLObjectCache $cache = null, EventDispatcher $eventDispatcher = null)
+    private function __construct(ExecutionContext $context, ?GraphQLObjectCache $cache = null, ?EventDispatcher $eventDispatcher = null)
     {
         if (! self::$UNDEFINED) {
             self::$UNDEFINED = Utils::undefined();
@@ -97,8 +97,8 @@ class ReferenceExecutor implements ExecutorImplementation
         $variableValues,
         ?string $operationName,
         callable $fieldResolver,
-        GraphQLObjectCache $cache = null,
-        EventDispatcher $eventDispatcher = null
+        ?GraphQLObjectCache $cache = null,
+        ?EventDispatcher $eventDispatcher = null
     ) : ExecutorImplementation {
         $exeContext = self::buildExecutionContext(
             $schema,
@@ -1239,12 +1239,17 @@ class ReferenceExecutor implements ExecutorImplementation
         // If there are no promises, we can just return the object
         if (! $containsPromise) {
             $results = self::fixResultsIfEmptyArray($results);
-            $event = new \Builderius\Bundle\GraphQLBundle\Event\GraphQLSubfieldsResolvedEvent($results, $fields);
+            // The event class lives in Builderius, not here, so it is only
+            // reached when a dispatcher was handed in - otherwise this library
+            // cannot be used without Builderius loaded.
             if ($this->eventDispatcher) {
+                $event = new \Builderius\Bundle\GraphQLBundle\Event\GraphQLSubfieldsResolvedEvent($results, $fields);
                 $this->eventDispatcher->dispatch($event, 'builderius_graphql_subfields_resolved');
+
+                return $event->getResults();
             }
 
-            return $event->getResults();
+            return $results;
         }
 
         // Otherwise, results is a map from field name to the result of resolving that

@@ -140,8 +140,8 @@ class Executor
         $variableValues = null,
         $operationName = null,
         ?callable $fieldResolver = null,
-        GraphQLObjectCache $cache = null,
-        EventDispatcher $eventDispatcher = null
+        ?GraphQLObjectCache $cache = null,
+        ?EventDispatcher $eventDispatcher = null
     ) {
         $factory = self::$implementationFactory;
 

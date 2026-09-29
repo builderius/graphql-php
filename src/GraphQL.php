@@ -89,8 +89,8 @@ class GraphQL
         ?string $operationName = null,
         ?callable $fieldResolver = null,
         ?array $validationRules = null,
-        GraphQLObjectCache $cache = null,
-        EventDispatcher $eventDispatcher = null
+        ?GraphQLObjectCache $cache = null,
+        ?EventDispatcher $eventDispatcher = null
     ) : ExecutionResult {
         $promiseAdapter = new SyncPromiseAdapter();
 
@@ -133,8 +133,8 @@ class GraphQL
         ?string $operationName = null,
         ?callable $fieldResolver = null,
         ?array $validationRules = null,
-        GraphQLObjectCache $cache = null,
-        EventDispatcher $eventDispatcher = null
+        ?GraphQLObjectCache $cache = null,
+        ?EventDispatcher $eventDispatcher = null
     ) : Promise {
         try {
             if ($source instanceof DocumentNode) {
