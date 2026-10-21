@@ -591,10 +591,52 @@ class ReferenceExecutor implements ExecutorImplementation
                     $propertyAccessor->setValue($res, \sprintf('[%s]', \implode('][', $tmpPath2)), []);
                 }
             }
-            $propertyAccessor->setValue($res, \sprintf('[%s]', \implode('][', $path)), $result);
+            $resultPath = \sprintf('[%s]', \implode('][', $path));
+            try {
+                $cached = $propertyAccessor->getValue($res, $resultPath);
+            } catch (\Exception $e) {
+                $cached = null;
+            }
+            $propertyAccessor->setValue($res, $resultPath, self::mergeIntoCachedResult($cached, $result));
             $this->cache->set('results', $res);
         }
 
+        return $result;
+    }
+
+    /**
+     * Keep what the subfields cached and the completed value no longer carries.
+     *
+     * Subfields write their own resolved values into the cache as they go; the
+     * parent then writes its COMPLETED value over the same path. A listener on
+     * `builderius_graphql_subfields_resolved` sits between the two and may
+     * have taken fields out of it - `@private` does exactly that - while the
+     * cache is what `expression_result` and every `{{...}}` argument read
+     * from. Replacing the subtree threw those values away, so a field marked
+     * private inside an object read back as null while the same field marked
+     * private at the top level read back fine.
+     *
+     * Only keys the completed value does not have are restored, and the only
+     * writer of those keys is this same method during this same execution, so
+     * nothing stale can come back.
+     */
+    private static function mergeIntoCachedResult($cached, $result)
+    {
+        // An object whose every field was taken out completes as an empty
+        // stdClass; what it held is still in the cache.
+        if (\is_object($result) && \is_array($cached) && $cached !== []) {
+            return $cached;
+        }
+        if (!\is_array($cached) || !\is_array($result)) {
+            return $result;
+        }
+        foreach ($cached as $key => $value) {
+            if (!\array_key_exists($key, $result)) {
+                $result[$key] = $value;
+                continue;
+            }
+            $result[$key] = self::mergeIntoCachedResult($value, $result[$key]);
+        }
         return $result;
     }
 
