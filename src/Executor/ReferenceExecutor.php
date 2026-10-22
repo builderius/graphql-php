@@ -72,6 +72,18 @@ class ReferenceExecutor implements ExecutorImplementation
     /** @var EventDispatcher */
     private $eventDispatcher;
 
+    /**
+     * Whether a listener has removed a field from a resolved selection set.
+     *
+     * The merge in {@see mergeIntoCachedResult()} exists only for that case,
+     * and it is not free: it rebuilds the cached subtree instead of storing
+     * the completed value as it is, which on a large result doubles the peak
+     * memory the execution needs. Most queries never remove anything - the
+     * `@private` directive is what does - so the merge is kept behind this,
+     * and a query without it pays nothing.
+     */
+    private $subfieldsRemoved = false;
+
     private function __construct(ExecutionContext $context, ?GraphQLObjectCache $cache = null, ?EventDispatcher $eventDispatcher = null)
     {
         if (! self::$UNDEFINED) {
@@ -592,12 +604,16 @@ class ReferenceExecutor implements ExecutorImplementation
                 }
             }
             $resultPath = \sprintf('[%s]', \implode('][', $path));
-            try {
-                $cached = $propertyAccessor->getValue($res, $resultPath);
-            } catch (\Exception $e) {
-                $cached = null;
+            $toCache = $result;
+            if ($this->subfieldsRemoved) {
+                try {
+                    $cached = $propertyAccessor->getValue($res, $resultPath);
+                } catch (\Exception $e) {
+                    $cached = null;
+                }
+                $toCache = self::mergeIntoCachedResult($cached, $result);
             }
-            $propertyAccessor->setValue($res, $resultPath, self::mergeIntoCachedResult($cached, $result));
+            $propertyAccessor->setValue($res, $resultPath, $toCache);
             $this->cache->set('results', $res);
         }
 
@@ -1287,8 +1303,16 @@ class ReferenceExecutor implements ExecutorImplementation
             if ($this->eventDispatcher) {
                 $event = new \Builderius\Bundle\GraphQLBundle\Event\GraphQLSubfieldsResolvedEvent($results, $fields);
                 $this->eventDispatcher->dispatch($event, 'builderius_graphql_subfields_resolved');
+                $kept = $event->getResults();
+                // A listener that took a field OUT - which is what @private
+                // does - leaves a value in the cache that the completed value
+                // no longer carries, and only then is the merge in
+                // resolveField() worth its cost.
+                if (is_array($kept) && is_array($results) && count($kept) < count($results)) {
+                    $this->subfieldsRemoved = true;
+                }
 
-                return $event->getResults();
+                return $kept;
             }
 
             return $results;
