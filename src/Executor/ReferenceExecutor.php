@@ -93,6 +93,32 @@ class ReferenceExecutor implements ExecutorImplementation
         $this->subFieldCache = new SplObjectStorage();
         $this->cache = $cache;
         $this->eventDispatcher = $eventDispatcher;
+        if ($cache !== null) {
+            // One execution, one results tree.
+            //
+            // The cache is a service and outlives any single query, while the
+            // tree inside it is addressed by response path alone: `{ early:
+            // thing { cnt } }` writes [early][cnt] whichever query asked for
+            // it. Two queries in one request that share a response key are
+            // therefore the same slot, and without this reset the second
+            // inherits whatever the first left there. Where the two types
+            // disagree the write in resolveField() cannot traverse the value
+            // it finds, throws, and the field is answered as null; where they
+            // agree it silently serves one query's value to the other. Two
+            // Builderius dataVars named `account` and `notice`, each with a
+            // field called `early`, were enough to do both.
+            //
+            // Starting empty is what the readers already assume - expression
+            // results, {{...}} arguments and @transform all read during the
+            // execution that is writing, never across two. Builderius's own
+            // batch executor flushed this cache for the same reason, but once
+            // per batch rather than once per query.
+            //
+            // This clears rather than saves and restores because no resolver
+            // executes a query of its own: every executeQuery call site is top
+            // level. A nested execution would have to stack the outer tree.
+            $cache->set('results', []);
+        }
     }
 
     /**
